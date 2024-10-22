@@ -95,7 +95,7 @@ class VCard
         // set property
         $this->setProperty(
             'address',
-            'ADR' . (($type != '') ? ';' . $type : '') . $this->getCharsetString(),
+            $this->createPropertyKey('ADR', true, $type),
             $value
         );
 
@@ -130,7 +130,7 @@ class VCard
     {
         $this->setProperty(
             'company',
-            'ORG' . $this->getCharsetString(),
+            $this->createPropertyKey('ORG'),
             $company
             . ($department != '' ? ';' . $department : '')
         );
@@ -148,20 +148,23 @@ class VCard
      *
      * @param  string $address The e-mail address
      * @param  string [optional] $type    The type of the email address
-     *                                    $type may be  PREF | WORK | HOME
-     *                                    or any combination of these: e.g. "PREF;WORK"
+     *                                    $type may be WORK | HOME
+     *                                    or any combination of these: e.g. "WORK"
+     * @param  boolean [optional] $pref
+     *                                   Set this number as preferred with pref = 1
      * @return $this
      */
-    public function addEmail($address, $type = '')
+    public function addEmail($address, $type = '', $pref = 0)
     {
         $this->setProperty(
             'email',
-            'EMAIL;INTERNET' . (($type != '') ? ';' . $type : ''),
+            $this->createPropertyKey('EMAIL', true, $type, $pref),
             $address
         );
 
         return $this;
     }
+
 
     /**
      * Add jobtitle
@@ -173,7 +176,7 @@ class VCard
     {
         $this->setProperty(
             'jobtitle',
-            'TITLE' . $this->getCharsetString(),
+            $this->createPropertyKey('TITLE', true),
             $jobtitle
         );
 
@@ -192,7 +195,7 @@ class VCard
     {
         $this->setProperty(
             'label',
-            'LABEL' . ($type !== '' ? ';' . $type : '') . $this->getCharsetString(),
+            $this->createPropertyKey('LABEL', true, $type),
             $label
         );
 
@@ -209,7 +212,7 @@ class VCard
     {
         $this->setProperty(
             'role',
-            'ROLE' . $this->getCharsetString(),
+            $this->createPropertyKey('ROLE', true),
             $role
         );
 
@@ -350,7 +353,7 @@ class VCard
         $property = $lastName . ';' . $firstName . ';' . $additional . ';' . $prefix . ';' . $suffix;
         $this->setProperty(
             'name',
-            'N' . $this->getCharsetString(),
+            $this->createPropertyKey('N', true),
             $property
         );
 
@@ -359,7 +362,7 @@ class VCard
             // set property
             $this->setProperty(
                 'fullname',
-                'FN' . $this->getCharsetString(),
+                $this->createPropertyKey('FN', true),
                 trim(implode(' ', $values))
             );
         }
@@ -377,7 +380,7 @@ class VCard
     {
         $this->setProperty(
             'note',
-            'NOTE' . $this->getCharsetString(),
+            $this->createPropertyKey('NOTE', true),
             $note
         );
 
@@ -394,7 +397,7 @@ class VCard
     {
         $this->setProperty(
             'categories',
-            'CATEGORIES' . $this->getCharsetString(),
+            $this->createPropertyKey('CATEGORIES', true),
             trim(implode(',', $categories))
         );
 
@@ -405,17 +408,19 @@ class VCard
      * Add phone number
      *
      * @param  string $number
-     * @param  string [optional] $type
-     *                                   Type may be PREF | WORK | HOME | VOICE | FAX | MSG |
+     * @param  string $type [optional]
+     *                                   Type may be WORK | HOME | VOICE | FAX | MSG |
      *                                   CELL | PAGER | BBS | CAR | MODEM | ISDN | VIDEO
-     *                                   or any senseful combination, e.g. "PREF;WORK;VOICE"
+     *                                   or any senseful combination, e.g. "WORK,VOICE"
+     * @param  boolean $pref [optional]
+     *                                   Set this number as preferred with pref = 1
      * @return $this
      */
-    public function addPhoneNumber($number, $type = '')
+    public function addPhoneNumber(string $number, string $type = '', bool|int $pref = false)
     {
         $this->setProperty(
             'phoneNumber',
-            'TEL' . (($type != '') ? ';' . $type : ''),
+            $this->createPropertyKey('TEL', false, $type, $pref),
             $number
         );
 
@@ -505,7 +510,7 @@ class VCard
     {
         $this->setProperty(
             'url',
-            'URL' . (($type != '') ? ';' . $type : ''),
+            $this->createPropertyKey('URL', false, $type),
             $url
         );
 
@@ -954,6 +959,16 @@ class VCard
         }
 
         $this->savePath = $savePath;
+    }
+
+    private function createPropertyKey(string $name, bool $charset = false, string $type = '', bool $pref = false): string
+    {
+        return implode(';', array_filter([
+            $name,
+            $pref ? 'PREF=1' : null,
+            $type ? 'TYPE=' . $type : null,
+            $charset ? 'CHARSET=' . $this->charset : null
+        ]));
     }
 
     /**

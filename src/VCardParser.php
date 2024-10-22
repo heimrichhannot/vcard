@@ -24,13 +24,6 @@ use stdClass;
 class VCardParser implements Iterator
 {
     /**
-     * The raw VCard content.
-    *
-     * @var string
-     */
-    protected $content;
-
-    /**
      * The VCard data objects.
      *
      * @var array
@@ -59,9 +52,14 @@ class VCardParser implements Iterator
         }
     }
 
-    public function __construct($content)
+    /**
+     * @param string $content
+     */
+    public function __construct(/**
+     * The raw VCard content.
+     */
+    protected $content)
     {
-        $this->content = $content;
         $this->vcardObjects = [];
         $this->rewind();
         $this->parse();
@@ -141,7 +139,7 @@ class VCardParser implements Iterator
         // decimal 32) as equivalent to no characters at all (i.e., the CRLF
         // and single white space character are removed).
         $this->content = preg_replace("/\n(?:[ \t])/", "", $this->content);
-        $lines = explode("\n", $this->content);
+        $lines = explode("\n", (string) $this->content);
 
         // Parse the VCard, line by line.
         foreach ($lines as $line) {
@@ -160,7 +158,7 @@ class VCardParser implements Iterator
 
                 $type = '';
                 $value = '';
-                @[$type, $value] = explode(':', $line, 2);
+                @[$type, $value] = explode(':', (string) $line, 2);
 
                 $types = explode(';', $type);
                 $element = strtoupper($types[0]);
@@ -177,22 +175,22 @@ class VCardParser implements Iterator
                 $i = 0;
                 $rawValue = false;
                 foreach ($types as $type) {
-                    if (preg_match('/base64/', strtolower($type))) {
+                    if (preg_match('/base64/', strtolower((string) $type))) {
                         $value = base64_decode($value);
                         unset($types[$i]);
                         $rawValue = true;
-                    } elseif (preg_match('/encoding=b/', strtolower($type))) {
+                    } elseif (preg_match('/encoding=b/', strtolower((string) $type))) {
                         $value = base64_decode($value);
                         unset($types[$i]);
                         $rawValue = true;
-                    } elseif (preg_match('/quoted-printable/', strtolower($type))) {
+                    } elseif (preg_match('/quoted-printable/', strtolower((string) $type))) {
                         $value = quoted_printable_decode($value);
                         unset($types[$i]);
                         $rawValue = true;
-                    } elseif (strpos(strtolower($type), 'charset=') === 0) {
+                    } elseif (str_starts_with(strtolower((string) $type), 'charset=')) {
                         try {
-                            $value = mb_convert_encoding($value, "UTF-8", substr($type, 8));
-                        } catch (\Exception $e) {
+                            $value = mb_convert_encoding($value, "UTF-8", substr((string) $type, 8));
+                        } catch (\Exception) {
                         }
                         unset($types[$i]);
                     }
@@ -281,7 +279,7 @@ class VCardParser implements Iterator
 
     protected function parseName($value)
     {
-        @[$lastname, $firstname, $additional, $prefix, $suffix] = explode(';', $value);
+        @[$lastname, $firstname, $additional, $prefix, $suffix] = explode(';', (string) $value);
         return (object) [
             'lastname' => $lastname,
             'firstname' => $firstname,
@@ -298,7 +296,7 @@ class VCardParser implements Iterator
 
     protected function parseAddress($value)
     {
-        @[$name, $extended, $street, $city, $region, $zip, $country, ] = explode(';', $value);
+        @[$name, $extended, $street, $city, $region, $zip, $country, ] = explode(';', (string) $value);
         return (object) [
             'name' => $name,
             'extended' => $extended,

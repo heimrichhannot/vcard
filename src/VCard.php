@@ -158,7 +158,7 @@ class VCard
     {
         $this->setProperty(
             'email',
-            $this->createPropertyKey('EMAIL', true, $type, $pref),
+            $this->createPropertyKey('EMAIL;INTERNET', true, $type, $pref),
             $address
         );
 
@@ -234,7 +234,7 @@ class VCard
 
         //Is this URL for a remote resource?
         if (filter_var($url, FILTER_VALIDATE_URL) !== false) {
-            $headers = get_headers($url, 1);
+            $headers = get_headers($url, true);
 
             if (array_key_exists('Content-Type', $headers)) {
                 $mimeType = $headers['Content-Type'];
@@ -246,10 +246,10 @@ class VCard
             //Local file, so inspect it directly
             $mimeType = mime_content_type($url);
         }
-        if (strpos($mimeType, ';') !== false) {
-            $mimeType = strstr($mimeType, ';', true);
+        if (str_contains((string) $mimeType, ';')) {
+            $mimeType = strstr((string) $mimeType, ';', true);
         }
-        if (!is_string($mimeType) || substr($mimeType, 0, 6) !== 'image/') {
+        if (!is_string($mimeType) || !str_starts_with($mimeType, 'image/')) {
             throw VCardException::invalidImage();
         }
         $fileType = strtoupper(substr($mimeType, 6));
@@ -302,10 +302,10 @@ class VCard
         $finfo = new \finfo();
         $mimeType = $finfo->buffer($content, FILEINFO_MIME_TYPE);
 
-        if (strpos($mimeType, ';') !== false) {
+        if (str_contains($mimeType, ';')) {
             $mimeType = strstr($mimeType, ';', true);
         }
-        if (!is_string($mimeType) || substr($mimeType, 0, 6) !== 'image/') {
+        if (!is_string($mimeType) || !str_starts_with($mimeType, 'image/')) {
             throw VCardException::invalidImage();
         }
         $fileType = strtoupper(substr($mimeType, 6));
@@ -592,7 +592,7 @@ class VCard
     protected function getUserAgent()
     {
         if (array_key_exists('HTTP_USER_AGENT', $_SERVER)) {
-            $browser = strtolower($_SERVER['HTTP_USER_AGENT']);
+            $browser = strtolower((string) $_SERVER['HTTP_USER_AGENT']);
         } else {
             $browser = 'unknown';
         }
@@ -896,10 +896,9 @@ class VCard
     /**
      * Set charset
      *
-     * @param  mixed $charset
      * @return void
      */
-    public function setCharset($charset): void
+    public function setCharset(mixed $charset): void
     {
         $this->charset = $charset;
     }
@@ -907,12 +906,11 @@ class VCard
     /**
      * Set filename
      *
-     * @param  mixed $value
      * @param  bool $overwrite [optional] Default overwrite is true
      * @param  string $separator [optional] Default separator is an underscore '_'
      * @return void
      */
-    public function setFilename($value, $overwrite = true, $separator = '_'): void
+    public function setFilename(mixed $value, $overwrite = true, $separator = '_'): void
     {
         // recast to string if $value is array
         if (is_array($value)) {
@@ -920,7 +918,7 @@ class VCard
         }
 
         // trim unneeded values
-        $value = trim($value, $separator);
+        $value = trim((string) $value, $separator);
 
         // remove all spaces
         $value = preg_replace('/\s+/', $separator, $value);

@@ -160,7 +160,7 @@ class VCardParser implements Iterator
 
                 $type = '';
                 $value = '';
-                @list($type, $value) = explode(':', $line, 2);
+                @[$type, $value] = explode(':', $line, 2);
 
                 $types = explode(';', $type);
                 $element = strtoupper($types[0]);
@@ -171,9 +171,7 @@ class VCardParser implements Iterator
                 // or can be prefixed with "type=". E.g.: "INTERNET" or
                 // "type=INTERNET".
                 if (!empty($types)) {
-                    $types = array_map(function($type) {
-                        return preg_replace('/^type=/i', '', $type);
-                    }, $types);
+                    $types = array_map(fn($type) => preg_replace('/^type=/i', '', $type), $types);
                 }
 
                 $i = 0;
@@ -283,13 +281,7 @@ class VCardParser implements Iterator
 
     protected function parseName($value)
     {
-        @list(
-            $lastname,
-            $firstname,
-            $additional,
-            $prefix,
-            $suffix
-        ) = explode(';', $value);
+        @[$lastname, $firstname, $additional, $prefix, $suffix] = explode(';', $value);
         return (object) [
             'lastname' => $lastname,
             'firstname' => $firstname,
@@ -306,15 +298,7 @@ class VCardParser implements Iterator
 
     protected function parseAddress($value)
     {
-        @list(
-            $name,
-            $extended,
-            $street,
-            $city,
-            $region,
-            $zip,
-            $country,
-        ) = explode(';', $value);
+        @[$name, $extended, $street, $city, $region, $zip, $country, ] = explode(';', $value);
         return (object) [
             'name' => $name,
             'extended' => $extended,

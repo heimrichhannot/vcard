@@ -228,7 +228,7 @@ class VCard
      * @param string $element The name of the element to set
      * @throws VCardException
      */
-    private function addMedia($property, $url, $element, $include = true)
+    private function addMedia($property, $url, $element, $include = true): void
     {
         $mimeType = null;
 
@@ -297,7 +297,7 @@ class VCard
      * @param string $content image content
      * @param string $element The name of the element to set
      */
-    private function addMediaContent($property, $content, $element)
+    private function addMediaContent($property, $content, $element): void
     {
         $finfo = new \finfo();
         $mimeType = $finfo->buffer($content, FILEINFO_MIME_TYPE);
@@ -615,7 +615,7 @@ class VCard
     /**
      * Download a vcard or vcal file to the browser.
      */
-    public function download()
+    public function download(): void
     {
         // define output
         $output = $this->getOutput();
@@ -878,7 +878,7 @@ class VCard
      *
      * @return void
      */
-    public function save()
+    public function save(): void
     {
         $file = $this->getFilename() . '.' . $this->getFileExtension();
 
@@ -899,7 +899,7 @@ class VCard
      * @param  mixed $charset
      * @return void
      */
-    public function setCharset($charset)
+    public function setCharset($charset): void
     {
         $this->charset = $charset;
     }
@@ -912,7 +912,7 @@ class VCard
      * @param  string $separator [optional] Default separator is an underscore '_'
      * @return void
      */
-    public function setFilename($value, $overwrite = true, $separator = '_')
+    public function setFilename($value, $overwrite = true, $separator = '_'): void
     {
         // recast to string if $value is array
         if (is_array($value)) {
@@ -947,7 +947,7 @@ class VCard
      * @param  string $savePath Save Path
      * @throws VCardException
      */
-    public function setSavePath($savePath)
+    public function setSavePath($savePath): void
     {
         if (!is_dir($savePath)) {
             throw VCardException::outputDirectoryNotExists();
@@ -979,7 +979,7 @@ class VCard
      * @param  string $value
      * @throws VCardException
      */
-    private function setProperty($element, $key, $value)
+    private function setProperty($element, $key, $value): void
     {
         if (!in_array($element, $this->multiplePropertiesForElementAllowed)
             && isset($this->definedElements[$element])
